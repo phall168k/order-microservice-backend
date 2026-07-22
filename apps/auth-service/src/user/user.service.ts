@@ -9,16 +9,21 @@ import { PasswordHash } from "libs/utils/password-hash.util";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { RpcException } from "@nestjs/microservices";
+import { UserSelectOptionResponseDto } from "./dto/user-select-option-response.dto";
 
 @Injectable()
 export class UserService extends BasePaginationCrudService<
   UserEntity,
   UserResponseDto
 > {
-  protected SORTABLE_COLUMNS = ["id", "username", "email", "createdAt"];
-  protected FILTER_COLUMNS = ["username", "email"];
-  protected SEARCHABLE_COLUMNS = ["username", "email", "roles.name"];
-  protected RELATIONSIP_FIELDS = ["roles"];
+  protected SORTABLE_COLUMNS = ["id", "username"];
+  protected FILTER_COLUMNS = ["username"];
+  protected SEARCHABLE_COLUMNS = [
+    "username",
+    "createdByUser.username",
+    "createdByUser.email",
+  ];
+  protected RELATIONSIP_FIELDS = ["roles", "createdByUser"];
 
   constructor(
     @InjectRepository(UserEntity)
@@ -32,9 +37,9 @@ export class UserService extends BasePaginationCrudService<
   }
 
   protected getMapperReponseEntityField(
-    entities: UserEntity,
+    entity: UserEntity,
   ): Promise<UserResponseDto> {
-    return UserMapper.toDtoWithRelationship(entities);
+    return UserMapper.toDtoWithRelationship(entity);
   }
 
   public async create(dto: CreateUserRequestDto): Promise<UserResponseDto> {
@@ -58,14 +63,13 @@ export class UserService extends BasePaginationCrudService<
     }
   }
 
-  public async findAllForSelection(): Promise<
-    { id: number; username: string }[]
-  > {
+  public async findAllForSelection(): Promise<UserSelectOptionResponseDto[]> {
     try {
       const entity = await this.userRepository.find({
         select: {
           id: true,
           username: true,
+          email: true,
         },
         where: {
           isActive: true,
@@ -126,7 +130,7 @@ export class UserService extends BasePaginationCrudService<
       });
       if (!entity) {
         throw new RpcException({
-          code: "NOT_FOUNT",
+          code: "NOT_FOUND",
           message: "User not found",
         });
       }
@@ -168,7 +172,7 @@ export class UserService extends BasePaginationCrudService<
       });
       if (!entity) {
         throw new RpcException({
-          code: "NOT_FOUNT",
+          code: "NOT_FOUND",
           message: "User not found",
         });
       }
