@@ -153,12 +153,6 @@ export class RoleService extends BasePaginationCrudService<
 
       return this.findOne(id);
     } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw new RpcException({
-          code: 'CONFLICT',
-          message: 'Role name already exists',
-        });
-      }
       throw error;
     }
   }
