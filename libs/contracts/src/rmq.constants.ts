@@ -30,6 +30,7 @@ export const MESSAGE_PATTERN = {
             CREATE: 'auth.user.create',
             GET_ALL: 'auth.user.getAll',
             SELECT_OPTIONS: 'auth.user.selectOptions',
+            GET_BY_USERNAME: 'auth.user.getByUsername',
             GET_BY_ID: 'auth.user.getById',
             UPDATE: 'auth.user.update',
             DELETE: 'auth.user.delete',

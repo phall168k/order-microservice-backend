@@ -31,6 +31,11 @@ export class UserController {
     return this.userService.findAllForSelection();
   }
 
+  @MessagePattern(MESSAGE_PATTERN.AUTH_SERVICE.USER.GET_BY_USERNAME)
+  findOneByUsername(username: string): Promise<UserEntity> {
+    return this.userService.findOneByUsername(username);
+  }
+
   @MessagePattern(MESSAGE_PATTERN.AUTH_SERVICE.USER.GET_BY_ID)
   findOne(@Payload() id: number): Promise<UserResponseDto> {
     return this.userService.findOne(id);

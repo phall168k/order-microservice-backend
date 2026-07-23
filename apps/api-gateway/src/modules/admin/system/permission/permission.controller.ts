@@ -7,11 +7,12 @@ import {
   HttpStatus,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
+  Put,
 } from "@nestjs/common";
 import {
   ApiCreatedResponse,
+  ApiBearerAuth,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
@@ -25,8 +26,11 @@ import { ApiPaginatedResponse } from "libs/paginations/api-paginated-response.de
 import { Paginate, type PaginateQuery } from "nestjs-paginate";
 import { PaginatedResponse } from "libs/paginations/paginated-response.type";
 import { PermissionEntity } from "apps/auth-service/src/permission/entities/permission.entity";
+import { SWAGGER_TOKEN_NAME } from "../../../../swagger/config";
+import { Permissions } from "../../../auth/decorators/permissions.decorator";
 
 @ApiTags("Admin - Permissions")
+@ApiBearerAuth(SWAGGER_TOKEN_NAME)
 @Controller({
   path: "admin/system/permissions",
   version: "1",
@@ -35,6 +39,7 @@ export class PermissionController {
   constructor(private readonly permissionService: PermissionService) {}
 
   @Post()
+  @Permissions('permission.create')
   @ApiOperation({ summary: "Create a permission" })
   @ApiCreatedResponse({ type: PermissionResponseDto })
   create(@Body() dto: CreatePermissionRequestDto) {
@@ -42,9 +47,12 @@ export class PermissionController {
   }
 
   @Get()
+  @Permissions('permission.read')
   @ApiOperation({ summary: "Get all permissions" })
   @ApiPaginatedResponse(PermissionResponseDto)
-  public findAll(@Paginate() query: PaginateQuery): Promise<PaginatedResponse<PermissionEntity, PermissionResponseDto>> {
+  public findAll(
+    @Paginate() query: PaginateQuery,
+  ): Promise<PaginatedResponse<PermissionEntity, PermissionResponseDto>> {
     return this.permissionService.findAll(query);
   }
 
@@ -56,13 +64,15 @@ export class PermissionController {
   }
 
   @Get(":id")
+  @Permissions('permission.read')
   @ApiOperation({ summary: "Get a permission by id" })
   @ApiOkResponse({ type: PermissionResponseDto })
   findOne(@Param("id", ParseIntPipe) id: number) {
     return this.permissionService.findOne(id);
   }
 
-  @Patch(":id")
+  @Put(":id")
+  @Permissions('permission.update')
   @ApiOperation({ summary: "Update a permission" })
   @ApiOkResponse({ type: PermissionResponseDto })
   update(
@@ -73,6 +83,7 @@ export class PermissionController {
   }
 
   @Delete(":id")
+  @Permissions('permission.delete')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: "Delete a permission" })
   @ApiNoContentResponse()
